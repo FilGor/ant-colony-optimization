@@ -47,8 +47,10 @@ class Ant:
 
     def find(self):
         global przejscie
+        global PheromoneValues
         actualPropabilities =[]
         for ite in range(iteracje):
+            PheromoneValues = PheromoneValues * (1-vaporizationValue)
             PathLength=0
             tempVisibilityMatrix = visibilityMatrix.copy()
             for iloscPrzejsc in miasta:#przejscie z miasta do miasta
@@ -117,6 +119,7 @@ class Ant:
                 nowaPozycja = routes[self.id,iloscPrzejsc]
 
                 PathLength += distanceMatrix[aktualnaPozycja-1,nowaPozycja-1]
+                actualPropabilities.clear()
 
             for miasto in range(routes.shape[1]-1): # aktualizacja feromonów
                 PheromoneValues[routes[self.id,miasto]-1,routes[self.id,miasto+1]-1] +=1/PathLength
@@ -124,7 +127,7 @@ class Ant:
 
 
 
-                actualPropabilities.clear()
+
 
 
 a1=Ant(0)
