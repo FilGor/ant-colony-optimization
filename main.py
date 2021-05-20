@@ -4,7 +4,8 @@ from numpy import inf
 
 
 alfa =1 # parametr sterujący ważnością intesywności śladu feromonowego
-beta =1 #parametr sterujacy waznoscia widocznosci nastepnego miasta
+beta =2 #parametr sterujacy waznoscia widocznosci nastepnego miasta
+vaporizationValue = 0.3
 
 iloscMiast=4
 miasta = [1,2,3,4]
@@ -34,20 +35,21 @@ visibilityMatrix[visibilityMatrix == inf] = 0    #wstawiamy tam zera
 
 iteracje =1
 numOfAnts = 4
-przejscie =1 #
+przejscie =1 # okresla miasto w ktorym aktualnie jest mrowka
 
 
 class Ant:
 
     def __init__(self, i):
         self.id = i
+        self.PathLength =0
 
 
     def find(self):
         global przejscie
         actualPropabilities =[]
         for ite in range(iteracje):
-            #aktualizacja feromonow
+            PathLength=0
             tempVisibilityMatrix = visibilityMatrix.copy()
             for iloscPrzejsc in miasta:#przejscie z miasta do miasta
                 if iloscPrzejsc >= iloscMiast: #uwidaczniamy miasto numer 1
@@ -59,7 +61,7 @@ class Ant:
                     goraWzoru = (pow(PheromoneValues[przejscie-1, miasto-1], alfa) * pow(tempVisibilityMatrix[przejscie-1, miasto-1],beta))
                     print("GORA WZORU : ")
                     print(goraWzoru)
-                    dolWzoru = np.multiply(np.power(PheromoneValues[przejscie-1,:],alfa), np.power(tempVisibilityMatrix[przejscie-1,:],beta)) # dodac alfe i bete
+                    dolWzoru = np.multiply(np.power(PheromoneValues[przejscie-1,:],alfa), np.power(tempVisibilityMatrix[przejscie-1,:],beta))
                     dolWzoru[dolWzoru == inf] = 0
                     print("DOL WZORU : ")
                     print(dolWzoru)
@@ -114,10 +116,12 @@ class Ant:
                 aktualnaPozycja = routes[self.id, iloscPrzejsc-1]
                 nowaPozycja = routes[self.id,iloscPrzejsc]
 
-                newPheromoneValue = np.add(PheromoneValues[nowaPozycja-1,aktualnaPozycja-1],visibilityMatrix[nowaPozycja-1,aktualnaPozycja-1])
+                PathLength += distanceMatrix[aktualnaPozycja-1,nowaPozycja-1]
 
-                PheromoneValues[nowaPozycja-1, aktualnaPozycja-1] = newPheromoneValue
-                PheromoneValues[aktualnaPozycja-1, nowaPozycja-1] = newPheromoneValue
+            for miasto in range(routes.shape[1]-1): # aktualizacja feromonów
+                PheromoneValues[routes[self.id,miasto]-1,routes[self.id,miasto+1]-1] +=1/PathLength
+                PheromoneValues[routes[self.id,miasto+1]-1,routes[self.id,miasto]-1] +=1/PathLength
+
 
 
                 actualPropabilities.clear()
